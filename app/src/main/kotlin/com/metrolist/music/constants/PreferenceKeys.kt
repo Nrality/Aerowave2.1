@@ -52,6 +52,7 @@ enum class DensityScale(
 
 val DefaultOpenTabKey = stringPreferencesKey("defaultOpenTab")
 val ForceBottomNavBarKey = booleanPreferencesKey("forceBottomNavBar")
+val AeroSkinKey = booleanPreferencesKey("aeroSkin")
 val SlimNavBarKey = booleanPreferencesKey("slimNavBar")
 val GridItemsSizeKey = stringPreferencesKey("gridItemSize")
 val SliderStyleKey = stringPreferencesKey("sliderStyle")

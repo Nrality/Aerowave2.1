@@ -686,7 +686,6 @@ fun HomeScreen(
     val isRandomizing by viewModel.isRandomizing.collectAsStateWithLifecycle()
     val pullRefreshState = rememberPullToRefreshState()
 
-    val quickPicksLazyGridState = rememberLazyGridState()
     val forgottenFavoritesLazyGridState = rememberLazyGridState()
 
     val accountName by viewModel.accountName.collectAsStateWithLifecycle()
@@ -1137,10 +1136,6 @@ fun HomeScreen(
             }
         }
 
-    LaunchedEffect(quickPicks) {
-        quickPicksLazyGridState.scrollToItem(0)
-    }
-
     LaunchedEffect(forgottenFavorites) {
         forgottenFavoritesLazyGridState.scrollToItem(0)
     }
@@ -1166,15 +1161,6 @@ fun HomeScreen(
         ) {
             val horizontalLazyGridItemWidthFactor = if (maxWidth * 0.475f >= 320.dp) 0.475f else 0.9f
             val horizontalLazyGridItemWidth = maxWidth * horizontalLazyGridItemWidthFactor
-            val quickPicksSnapLayoutInfoProvider =
-                remember(quickPicksLazyGridState) {
-                    SnapLayoutInfoProvider(
-                        lazyGridState = quickPicksLazyGridState,
-                        positionInLayout = { layoutSize, itemSize ->
-                            (layoutSize * horizontalLazyGridItemWidthFactor / 2f - itemSize / 2f)
-                        },
-                    )
-                }
             val forgottenFavoritesSnapLayoutInfoProvider =
                 remember(forgottenFavoritesLazyGridState) {
                     SnapLayoutInfoProvider(
@@ -1784,86 +1770,44 @@ fun HomeScreen(
                                 }
 
                                 item(key = "quick_picks_list") {
-                                    LazyHorizontalGrid(
-                                        state = quickPicksLazyGridState,
-                                        rows = GridCells.Fixed(4),
-                                        flingBehavior = rememberSnapFlingBehavior(quickPicksSnapLayoutInfoProvider),
-                                        contentPadding =
-                                            WindowInsets.systemBars
-                                                .only(WindowInsetsSides.Horizontal)
-                                                .asPaddingValues(),
-                                        modifier =
-                                            Modifier
-                                                .fillMaxWidth()
-                                                .height(ListItemHeight * 4),
-                                        ) {
-                                            items(
-                                                items = quickPicks.distinctBy { it.id },
-                                                key = { "home_quickpick_${it.id}" },
-                                            ) { originalSong ->
-                                            // fetch song from database to keep updated
-                                            val song by database
-                                                .song(originalSong.id)
-                                                .collectAsStateWithLifecycle(initialValue = originalSong)
-
-                                            SongListItem(
-                                                song = song!!,
-                                                showInLibraryIcon = true,
-                                                isActive = song!!.id == mediaMetadata?.id,
-                                                isPlaying = isPlaying,
-                                                isSwipeable = false,
-                                                trailingContent = {
-                                                    IconButton(
-                                                        onClick = {
-                                                            menuState.show {
-                                                                SongMenu(
-                                                                    originalSong = song!!,
-                                                                    onDismiss = menuState::dismiss,
-                                                                )
-                                                            }
-                                                        },
-                                                    ) {
-                                                        Icon(
-                                                            painter = painterResource(R.drawable.more_vert),
-                                                            contentDescription = null,
-                                                        )
-                                                    }
-                                                },
-                                                modifier =
-                                                    Modifier
-                                                        .width(horizontalLazyGridItemWidth)
-                                                        .combinedClickable(
+                                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                        quickPicks.distinctBy { it.id }.chunked(3).forEach { rowSongs ->
+                                            Row(Modifier.fillMaxWidth()) {
+                                                rowSongs.forEach { originalSong ->
+                                                    val song by database.song(originalSong.id)
+                                                        .collectAsStateWithLifecycle(initialValue = originalSong)
+                                                    SongGridItem(
+                                                        song = song ?: originalSong,
+                                                        showInLibraryIcon = true,
+                                                        isActive = originalSong.id == mediaMetadata?.id,
+                                                        isPlaying = isPlaying,
+                                                        fillMaxWidth = true,
+                                                        modifier = Modifier.weight(1f).combinedClickable(
                                                             onClick = {
                                                                 if (!isListenTogetherGuest) {
-                                                                    if (song!!.id == mediaMetadata?.id) {
+                                                                    if (originalSong.id == mediaMetadata?.id) {
                                                                         playerConnection.togglePlayPause()
                                                                     } else {
+                                                                        val currentSong = song ?: originalSong
                                                                         playerConnection.playQueue(
-                                                                            if (autoRadioQueue) {
-                                                                                YouTubeQueue.radio(
-                                                                                    song!!.toMediaMetadata(),
-                                                                                )
-                                                                            } else {
-                                                                                ListQueue(
-                                                                                    title = song!!.title,
-                                                                                    items = listOf(song!!.toMediaItem())
-                                                                                )
-                                                                            }
+                                                                            if (autoRadioQueue) YouTubeQueue.radio(currentSong.toMediaMetadata())
+                                                                            else ListQueue(title = currentSong.title, items = listOf(currentSong.toMediaItem())),
                                                                         )
                                                                     }
                                                                 }
                                                             },
                                                             onLongClick = {
                                                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                                val currentSong = song ?: originalSong
                                                                 menuState.show {
-                                                                    SongMenu(
-                                                                        originalSong = song!!,
-                                                                        onDismiss = menuState::dismiss,
-                                                                    )
+                                                                    SongMenu(originalSong = currentSong, onDismiss = menuState::dismiss)
                                                                 }
                                                             },
                                                         ),
-                                            )
+                                                    )
+                                                }
+                                                repeat(3 - rowSongs.size) { Spacer(Modifier.weight(1f)) }
+                                            }
                                         }
                                     }
                                 }

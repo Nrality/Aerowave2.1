@@ -137,6 +137,7 @@ import com.metrolist.innertube.models.SongItem
 import com.metrolist.innertube.models.WatchEndpoint
 import com.metrolist.music.constants.AppBarHeight
 import com.metrolist.music.constants.AppLanguageKey
+import com.metrolist.music.constants.AeroSkinKey
 import com.metrolist.music.constants.CheckForUpdatesKey
 import com.metrolist.music.constants.DarkModeKey
 import com.metrolist.music.constants.DefaultOpenTabKey
@@ -184,6 +185,9 @@ import com.metrolist.music.playback.queues.YouTubeQueue
 import com.metrolist.music.ui.component.AccountSettingsDialog
 import com.metrolist.music.ui.component.AppNavigationBar
 import com.metrolist.music.ui.component.AppNavigationRail
+import com.metrolist.music.ui.component.ActiveNavStyle
+import com.metrolist.music.ui.component.CategoryRibbon
+import com.metrolist.music.ui.component.NavStyle
 import com.metrolist.music.ui.component.BottomSheetMenu
 import com.metrolist.music.ui.component.BottomSheetPage
 import com.metrolist.music.ui.component.LocalBottomSheetPageState
@@ -200,6 +204,8 @@ import com.metrolist.music.ui.screens.settings.NavigationTab
 import com.metrolist.music.ui.theme.ColorSaver
 import com.metrolist.music.ui.theme.DefaultThemeColor
 import com.metrolist.music.ui.theme.MetrolistTheme
+import com.metrolist.music.ui.theme.AeroTokens
+import com.metrolist.music.ui.theme.AeroBackground
 import com.metrolist.music.ui.theme.extractThemeColor
 import com.metrolist.music.ui.utils.appBarScrollBehavior
 import com.metrolist.music.ui.utils.resetHeightOffset
@@ -617,6 +623,7 @@ class MainActivity : FragmentActivity() {
             remember(pureBlackEnabled, useDarkTheme) {
                 pureBlackEnabled && useDarkTheme
             }
+        val aeroSkin by rememberPreference(AeroSkinKey, defaultValue = true)
 
         val (selectedThemeColorInt) = rememberPreference(SelectedThemeColorKey, defaultValue = DefaultThemeColor.toArgb())
         val selectedThemeColor = Color(selectedThemeColorInt)
@@ -685,6 +692,7 @@ class MainActivity : FragmentActivity() {
             darkTheme = useDarkTheme,
             pureBlack = pureBlack,
             themeColor = themeColor,
+            aeroEnabled = aeroSkin,
         ) {
             val currentDensity = LocalDensity.current
             val windowInfo = LocalWindowInfo.current
@@ -716,7 +724,20 @@ class MainActivity : FragmentActivity() {
                 modifier =
                     Modifier
                         .fillMaxSize()
-                        .background(if (pureBlack) Color.Black else MaterialTheme.colorScheme.surface),
+                        .then(
+                            when {
+                                pureBlack -> Modifier.background(Color.Black)
+                                aeroSkin -> Modifier.background(
+                                    androidx.compose.ui.graphics.Brush.verticalGradient(
+                                    listOf(
+                                        if (useDarkTheme) AeroTokens.DarkOcean else AeroTokens.LightSky,
+                                        if (useDarkTheme) Color(0xFF0B4554) else AeroTokens.LightMint,
+                                    ),
+                                    ),
+                                )
+                                else -> Modifier.background(MaterialTheme.colorScheme.surface)
+                            },
+                        ),
             ) {
                 val density = LocalDensity.current
                 val configuration = LocalWindowInfo.current
@@ -777,6 +798,7 @@ class MainActivity : FragmentActivity() {
                         listOf(
                             Screens.Home.route,
                             Screens.Library.route,
+                            "new_release",
                             Screens.ListenTogether.route,
                             "settings",
                         )
@@ -817,7 +839,7 @@ class MainActivity : FragmentActivity() {
                 }
                 val navigationItemRoutes =
                     remember(navigationItems) {
-                        navigationItems.map { it.route }.toSet()
+                        navigationItems.map { it.route }.toSet() + "new_release"
                     }
 
                 val shouldShowNavigationBar =
@@ -830,17 +852,17 @@ class MainActivity : FragmentActivity() {
                 val isLandscape = configuration.containerDpSize.width > configuration.containerDpSize.height
                 val isTablet = configuration.containerDpSize.width >= 600.dp
 
-                val showRail = !forceBottomNav && (isLandscape || isTablet) && !inSearchScreen
+                val showRail = ActiveNavStyle == NavStyle.BottomBar && !forceBottomNav && (isLandscape || isTablet) && !inSearchScreen
 
                 val navPadding =
-                    if (shouldShowNavigationBar && !showRail) {
+                    if (ActiveNavStyle == NavStyle.BottomBar && shouldShowNavigationBar && !showRail) {
                         if (slimNav) SlimNavBarHeight else NavigationBarHeight
                     } else {
                         0.dp
                     }
 
                 val navigationBarHeight by animateDpAsState(
-                    targetValue = if (shouldShowNavigationBar && !showRail) NavigationBarHeight else 0.dp,
+                    targetValue = if (ActiveNavStyle == NavStyle.BottomBar && shouldShowNavigationBar && !showRail) NavigationBarHeight else 0.dp,
                     animationSpec = NavigationBarAnimationSpec,
                     label = "navBarHeight",
                 )
@@ -1019,11 +1041,13 @@ class MainActivity : FragmentActivity() {
                             Screens.Search.route -> R.string.search
                             Screens.Library.route -> R.string.filter_library
                             Screens.ListenTogether.route -> R.string.together
+                            "new_release" -> R.string.explore
                             else -> null
                         }
                     }
 
                 var showAccountDialog by remember { mutableStateOf(false) }
+                var showShellMenu by remember { mutableStateOf(false) }
 
                 val pauseListenHistory by rememberPreference(PauseListenHistoryKey, defaultValue = false)
                 val eventCount by database.eventCount().collectAsStateWithLifecycle(initialValue = 0)
@@ -1048,11 +1072,15 @@ class MainActivity : FragmentActivity() {
                     LocalChangelogState provides showChangelog,
                     LocalArtistNameAliases provides artistNameAliases,
                 ) {
+                    if (aeroSkin && !pureBlack) {
+                        AeroBackground(dark = useDarkTheme, modifier = Modifier.fillMaxSize())
+                    }
                     if (showChangelog.value) {
                         ChangelogScreen(onDismiss = { showChangelog.value = false })
                     }
 
                     Scaffold(
+                        containerColor = if (aeroSkin) Color.Transparent else MaterialTheme.colorScheme.background,
                         snackbarHost = { SnackbarHost(snackbarHostState) },
                         topBar = {
                             AnimatedVisibility(
@@ -1060,10 +1088,10 @@ class MainActivity : FragmentActivity() {
                                 enter = fadeIn(animationSpec = tween(durationMillis = 300)),
                                 exit = fadeOut(animationSpec = tween(durationMillis = 200)),
                             ) {
-                                Row {
+                                Column(Modifier.fillMaxWidth()) {
                                     TopAppBar(
                                         title = {
-                                            if (currentRoute == Screens.Home.route) {
+                                            if (currentRoute in setOf(Screens.Home.route, Screens.Library.route, "new_release")) {
                                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                                     Box(
                                                         modifier = Modifier
@@ -1086,7 +1114,7 @@ class MainActivity : FragmentActivity() {
                                                         )
                                                     }
                                                     Text(
-                                                        text = "AEROWAVE",
+                                                        text = stringResource(R.string.app_name).uppercase(),
                                                         modifier = Modifier.padding(start = 10.dp),
                                                         style = MaterialTheme.typography.titleLarge,
                                                         color = MaterialTheme.colorScheme.primary,
@@ -1100,7 +1128,52 @@ class MainActivity : FragmentActivity() {
                                                 )
                                             }
                                         },
+                                        navigationIcon = {
+                                            if (currentRoute in setOf(Screens.Home.route, Screens.Library.route, "new_release")) {
+                                                Box {
+                                                    IconButton(onClick = { showShellMenu = true }) {
+                                                        Icon(
+                                                            painter = painterResource(R.drawable.more_vert),
+                                                            contentDescription = stringResource(R.string.more_options),
+                                                        )
+                                                    }
+                                                    androidx.compose.material3.DropdownMenu(
+                                                        expanded = showShellMenu,
+                                                        onDismissRequest = { showShellMenu = false },
+                                                    ) {
+                                                        androidx.compose.material3.DropdownMenuItem(
+                                                            text = { Text(stringResource(R.string.together)) },
+                                                            onClick = { showShellMenu = false; navController.navigate("listen_together_from_topbar") },
+                                                        )
+                                                        androidx.compose.material3.DropdownMenuItem(
+                                                            text = { Text(stringResource(R.string.recognize_music)) },
+                                                            onClick = { showShellMenu = false; navController.navigate("recognition") },
+                                                        )
+                                                        androidx.compose.material3.DropdownMenuItem(
+                                                            text = { Text(stringResource(R.string.history)) },
+                                                            onClick = { showShellMenu = false; navController.navigate("history") },
+                                                        )
+                                                        androidx.compose.material3.DropdownMenuItem(
+                                                            text = { Text(stringResource(R.string.stats)) },
+                                                            onClick = { showShellMenu = false; navController.navigate("stats") },
+                                                        )
+                                                        androidx.compose.material3.DropdownMenuItem(
+                                                            text = { Text(stringResource(R.string.account)) },
+                                                            onClick = { showShellMenu = false; showAccountDialog = true },
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        },
                                         actions = {
+                                            if (currentRoute in setOf(Screens.Home.route, Screens.Library.route, "new_release")) {
+                                                IconButton(onClick = { navController.navigate(Screens.Search.route) }) {
+                                                    Icon(painterResource(R.drawable.search), contentDescription = stringResource(R.string.search))
+                                                }
+                                                IconButton(onClick = { navController.navigate("settings") }) {
+                                                    Icon(painterResource(R.drawable.settings), contentDescription = stringResource(R.string.settings))
+                                                }
+                                            } else {
                                             if (showHistoryButton) {
                                                 IconButton(onClick = { navController.navigate("history") }) {
                                                     Icon(
@@ -1147,6 +1220,7 @@ class MainActivity : FragmentActivity() {
                                                     }
                                                 }
                                             }
+                                            }
                                         },
                                         scrollBehavior = topAppBarScrollBehavior,
                                         colors =
@@ -1167,6 +1241,23 @@ class MainActivity : FragmentActivity() {
                                                 },
                                             ),
                                     )
+                                    if (ActiveNavStyle == NavStyle.TopRibbon && currentRoute in setOf(Screens.Home.route, Screens.Library.route, "new_release")) {
+                                        CategoryRibbon(
+                                            selectedRoute = currentRoute.orEmpty(),
+                                            onSelect = { route ->
+                                                if (route == currentRoute) {
+                                                    navController.currentBackStackEntry?.savedStateHandle?.set("scrollToTop", true)
+                                                    coroutineScope.launch { topAppBarScrollBehavior.state.resetHeightOffset() }
+                                                } else {
+                                                    navController.navigate(route) {
+                                                        popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                                        launchSingleTop = true
+                                                        restoreState = true
+                                                    }
+                                                }
+                                            },
+                                        )
+                                    }
                                 }
                             }
                         },
@@ -1235,7 +1326,7 @@ class MainActivity : FragmentActivity() {
                             // Pre-calculate values for graphicsLayer to avoid reading state during composition
                             val navBarTotalHeight = bottomInset + NavigationBarHeight
 
-                            if (!showRail && currentRoute != "wrapped") {
+                            if (ActiveNavStyle == NavStyle.BottomBar && !showRail && currentRoute != "wrapped") {
                                 Box {
                                     if (activePlayerConnection != null) {
                                         BottomSheetPlayer(

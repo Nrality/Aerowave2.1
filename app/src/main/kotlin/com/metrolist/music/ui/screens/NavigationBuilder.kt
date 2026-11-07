@@ -126,7 +126,7 @@ fun NavGraphBuilder.navigationBuilder(
     }
 
     composable("new_release") {
-        NewReleaseScreen(navController)
+        NewReleaseScreen(navController, showHeader = false)
     }
 
     composable("charts_screen") {

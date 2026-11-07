@@ -48,6 +48,7 @@ import com.metrolist.music.viewmodels.NewReleaseViewModel
 fun NewReleaseScreen(
     navController: NavController,
     viewModel: NewReleaseViewModel = hiltViewModel(),
+    showHeader: Boolean = true,
 ) {
     val menuState = LocalMenuState.current
     val haptic = LocalHapticFeedback.current
@@ -102,18 +103,20 @@ fun NewReleaseScreen(
         }
     }
 
-    TopAppBar(
-        title = { Text(stringResource(R.string.new_release_albums)) },
-        navigationIcon = {
-            IconButton(
-                onClick = navController::navigateUp,
-                onLongClick = navController::backToMain,
-            ) {
-                Icon(
-                    painterResource(R.drawable.arrow_back),
-                    contentDescription = null,
-                )
-            }
-        },
-    )
+    if (showHeader) {
+        TopAppBar(
+            title = { Text(stringResource(R.string.new_release_albums)) },
+            navigationIcon = {
+                IconButton(
+                    onClick = navController::navigateUp,
+                    onLongClick = navController::backToMain,
+                ) {
+                    Icon(
+                        painterResource(R.drawable.arrow_back),
+                        contentDescription = null,
+                    )
+                }
+            },
+        )
+    }
 }

@@ -28,6 +28,7 @@ fun MetrolistTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     pureBlack: Boolean = false,
     themeColor: Color = DefaultThemeColor,
+    aeroEnabled: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val baseColorScheme = rememberDynamicColorScheme(
@@ -38,8 +39,39 @@ fun MetrolistTheme(
     )
 
     // Apply pureBlack modification if needed, similar to original logic
-    val colorScheme = remember(baseColorScheme, pureBlack, darkTheme) {
+    val colorScheme = remember(baseColorScheme, pureBlack, darkTheme, aeroEnabled) {
         when {
+            aeroEnabled && darkTheme && pureBlack -> baseColorScheme.pureBlack(true).copy(
+                primary = AeroTokens.Aqua,
+                secondary = AeroTokens.Grass,
+                tertiary = AeroTokens.Sky,
+            )
+            aeroEnabled && darkTheme -> baseColorScheme.copy(
+                primary = AeroTokens.Aqua,
+                onPrimary = AeroTokens.DarkOcean,
+                secondary = AeroTokens.Grass,
+                tertiary = AeroTokens.Sky,
+                background = AeroTokens.DarkOcean,
+                surface = AeroTokens.DarkGlass,
+                surfaceContainerLowest = Color(0xCC0B2F40),
+                surfaceContainerLow = Color(0xD9103545),
+                surfaceContainer = AeroTokens.DarkGlass,
+                surfaceContainerHigh = Color(0xE31A4658),
+                surfaceContainerHighest = Color(0xEE205366),
+            )
+            aeroEnabled -> baseColorScheme.copy(
+                primary = Color(0xFF087F9C),
+                onPrimary = Color.White,
+                secondary = Color(0xFF388B51),
+                tertiary = Color(0xFF168FB1),
+                background = AeroTokens.LightSky,
+                surface = AeroTokens.LightGlass,
+                surfaceContainerLowest = Color(0xEFFFFFFF),
+                surfaceContainerLow = Color(0xEAF7FDFF),
+                surfaceContainer = AeroTokens.LightGlass,
+                surfaceContainerHigh = Color(0xEAF0FBFF),
+                surfaceContainerHighest = Color(0xE5E4F7FC),
+            )
             darkTheme && pureBlack -> baseColorScheme.pureBlack(true)
             darkTheme -> baseColorScheme.copy(
                 background = Color(0xFF071D2A),

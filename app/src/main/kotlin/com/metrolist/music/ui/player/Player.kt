@@ -43,6 +43,9 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.asPaddingValues
@@ -816,6 +819,30 @@ fun BottomSheetPlayer(
             collapsedBound = dismissedBound + 1.dp,
             initialAnchor = 1,
         )
+
+    val playerPagerState = rememberPagerState(pageCount = { 3 })
+    LaunchedEffect(showInlineLyrics) {
+        if (playerPagerState.currentPage != 2) {
+            playerPagerState.animateScrollToPage(if (showInlineLyrics) 1 else 0)
+        }
+    }
+    LaunchedEffect(playerPagerState.currentPage) {
+        when (playerPagerState.currentPage) {
+            0 -> {
+                showInlineLyrics = false
+                queueSheetState.collapseSoft()
+            }
+            1 -> {
+                showInlineLyrics = true
+                queueSheetState.collapseSoft()
+            }
+            2 -> {
+                showInlineLyrics = false
+                isFullScreen = false
+                queueSheetState.expandSoft()
+            }
+        }
+    }
 
     val bottomSheetBackgroundColor =
         when (playerBackground) {
@@ -1926,8 +1953,8 @@ fun BottomSheetPlayer(
                             ).padding(bottom = 24.dp)
                             .fillMaxSize(),
                 ) {
-                    Box(
-                        contentAlignment = Alignment.Center,
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
                         modifier =
                             Modifier
                                 .weight(1f)
@@ -1937,27 +1964,27 @@ fun BottomSheetPlayer(
                         val currentSliderPosition by rememberUpdatedState(sliderPosition)
                         val sliderPositionProvider = remember { { currentSliderPosition } }
                         val isExpandedProvider = remember(state) { { state.isExpanded } }
-                        AnimatedContent(
-                            targetState = showInlineLyrics,
-                            label = "Lyrics",
-                            transitionSpec = { fadeIn() togetherWith fadeOut() },
-                        ) { showLyrics ->
-                            if (showLyrics) {
-                                InlineLyricsView(
-                                    mediaMetadata = mediaMetadata,
-                                    showLyrics = showLyrics,
-                                    positionProvider = { effectivePosition },
-                                )
-                            } else {
-                                Thumbnail(
+                        HorizontalPager(
+                            state = playerPagerState,
+                            modifier = Modifier.weight(1f).fillMaxWidth(),
+                        ) { page ->
+                            when (page) {
+                                0 -> Thumbnail(
                                     sliderPositionProvider = sliderPositionProvider,
-                                    modifier = Modifier.animateContentSize(),
+                                    modifier = Modifier.fillMaxSize().animateContentSize(),
                                     isPlayerExpanded = isExpandedProvider,
                                     isLandscape = true,
                                     isListenTogetherGuest = isListenTogetherGuest,
                                 )
+                                1 -> InlineLyricsView(
+                                    mediaMetadata = mediaMetadata,
+                                    showLyrics = true,
+                                    positionProvider = { effectivePosition },
+                                )
+                                else -> PlayerQueuePage()
                             }
                         }
+                        PlayerPageTabs(playerPagerState)
                     }
 
                     Column(
@@ -1992,34 +2019,34 @@ fun BottomSheetPlayer(
                             .padding(bottom = bottomPadding)
                             .animateContentSize(),
                 ) {
-                    Box(
-                        contentAlignment = Alignment.Center,
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.weight(1f),
                     ) {
                         // Remember lambdas to prevent unnecessary recomposition
                         val currentSliderPosition by rememberUpdatedState(sliderPosition)
                         val sliderPositionProvider = remember { { currentSliderPosition } }
                         val isExpandedProvider = remember(state) { { state.isExpanded } }
-                        AnimatedContent(
-                            targetState = showInlineLyrics,
-                            label = "Lyrics",
-                            transitionSpec = { fadeIn() togetherWith fadeOut() },
-                        ) { showLyrics ->
-                            if (showLyrics) {
-                                InlineLyricsView(
-                                    mediaMetadata = mediaMetadata,
-                                    showLyrics = showLyrics,
-                                    positionProvider = { effectivePosition },
-                                )
-                            } else {
-                                Thumbnail(
+                        HorizontalPager(
+                            state = playerPagerState,
+                            modifier = Modifier.weight(1f).fillMaxWidth(),
+                        ) { page ->
+                            when (page) {
+                                0 -> Thumbnail(
                                     sliderPositionProvider = sliderPositionProvider,
-                                    modifier = Modifier.nestedScroll(state.preUpPostDownNestedScrollConnection),
+                                    modifier = Modifier.fillMaxSize().nestedScroll(state.preUpPostDownNestedScrollConnection),
                                     isPlayerExpanded = isExpandedProvider,
                                     isListenTogetherGuest = isListenTogetherGuest,
                                 )
+                                1 -> InlineLyricsView(
+                                    mediaMetadata = mediaMetadata,
+                                    showLyrics = true,
+                                    positionProvider = { effectivePosition },
+                                )
+                                else -> PlayerQueuePage()
                             }
                         }
+                        PlayerPageTabs(playerPagerState)
                     }
 
                     mediaMetadata?.let {
@@ -2057,6 +2084,55 @@ fun BottomSheetPlayer(
                 },
             )
         }
+    }
+}
+
+@Composable
+private fun PlayerPageTabs(pagerState: PagerState) {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val labels = listOf(R.string.now_playing, R.string.lyrics, R.string.queue)
+
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        labels.forEachIndexed { index, label ->
+            val selected = pagerState.currentPage == index
+            Box(
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(
+                            if (selected) MaterialTheme.colorScheme.secondaryContainer
+                            else MaterialTheme.colorScheme.surfaceContainer,
+                        ).clickable {
+                            coroutineScope.launch { pagerState.animateScrollToPage(index) }
+                        }.padding(horizontal = 8.dp, vertical = 10.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = context.getString(label),
+                    color =
+                        if (selected) MaterialTheme.colorScheme.onSecondaryContainer
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.labelMedium,
+                    maxLines = 1,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PlayerQueuePage() {
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(
+            text = stringResource(R.string.queue),
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
     }
 }
 

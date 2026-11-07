@@ -54,6 +54,7 @@ import androidx.navigation.NavController
 import com.metrolist.music.LocalPlayerAwareWindowInsets
 import com.metrolist.music.R
 import com.metrolist.music.constants.ChipSortTypeKey
+import com.metrolist.music.constants.AeroSkinKey
 import com.metrolist.music.constants.CropAlbumArtKey
 import com.metrolist.music.constants.DefaultOpenTabKey
 import com.metrolist.music.constants.DensityScale
@@ -131,6 +132,7 @@ fun AppearanceSettings(
             DynamicThemeKey,
             defaultValue = true,
         )
+    val (aeroSkin, onAeroSkinChange) = rememberPreference(AeroSkinKey, defaultValue = true)
     val (enableDynamicIcon, onEnableDynamicIconPrefChange) =
         rememberPreference(
             EnableDynamicIconKey,
@@ -909,6 +911,27 @@ fun AppearanceSettings(
             title = stringResource(R.string.theme),
             items =
                 buildList {
+                    add(
+                        Material3SettingsItem(
+                            icon = painterResource(R.drawable.palette),
+                            title = { Text(stringResource(R.string.aero_skin)) },
+                            description = { Text(stringResource(R.string.aero_skin_desc)) },
+                            trailingContent = {
+                                Switch(
+                                    checked = aeroSkin,
+                                    onCheckedChange = onAeroSkinChange,
+                                    thumbContent = {
+                                        Icon(
+                                            painter = painterResource(if (aeroSkin) R.drawable.check else R.drawable.close),
+                                            contentDescription = null,
+                                            modifier = Modifier.size(SwitchDefaults.IconSize),
+                                        )
+                                    },
+                                )
+                            },
+                            onClick = { onAeroSkinChange(!aeroSkin) },
+                        ),
+                    )
                     add(
                         Material3SettingsItem(
                             icon = painterResource(R.drawable.speed),
