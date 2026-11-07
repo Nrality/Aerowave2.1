@@ -379,61 +379,15 @@ private fun NewMiniPlayer(
                     .then(if (isTabletLandscape) Modifier.width(500.dp).align(Alignment.Center) else Modifier.fillMaxWidth())
                     .height(64.dp)
                     .offset { IntOffset(offsetXAnimatable.value.roundToInt(), 0) }
-                    .clip(RoundedCornerShape(32.dp))
-                    .background(color = backgroundColor)
-                    .border(1.dp, outlineColor.copy(alpha = 0.3f), RoundedCornerShape(32.dp))
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(Color(0xFF081408))
+                    .border(1.dp, Color(0xFF63A830), RoundedCornerShape(4.dp))
                     .clickable(
                         interactionSource = interactionSource,
                         indication = LocalIndication.current,
                         onClick = onClick
                     ),
         ) {
-            when (miniPlayerBackground) {
-                MiniPlayerBackgroundStyle.BLUR -> {
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-                        mediaMetadata?.thumbnailUrl?.let { url ->
-                            AsyncImage(
-                                model = url,
-                                contentDescription = null,
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .blur(60.dp),
-                            )
-                            Box(
-                                Modifier
-                                    .fillMaxSize()
-                                    .background(Color.Black.copy(alpha = 0.45f)),
-                            )
-                        }
-                    }
-                }
-                MiniPlayerBackgroundStyle.GRADIENT -> {
-                    val colors = if (gradientColors.isNotEmpty()) gradientColors
-                    else listOf(
-                        MaterialTheme.colorScheme.surfaceContainer,
-                        MaterialTheme.colorScheme.surfaceContainer,
-                    )
-                    Box(
-                        Modifier
-                            .fillMaxSize()
-                            .background(
-                                Brush.horizontalGradient(colors)
-                            )
-                            .background(Color.Black.copy(alpha = 0.15f)),
-                    )
-                }
-                else -> {}
-            }
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(Color.White.copy(alpha = 0.32f), Color.White.copy(alpha = 0.06f), Color.Transparent),
-                        ),
-                    ),
-            )
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp, vertical = 8.dp),
