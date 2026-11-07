@@ -206,7 +206,6 @@ import com.metrolist.music.ui.theme.DefaultThemeColor
 import com.metrolist.music.ui.theme.MetrolistTheme
 import com.metrolist.music.ui.theme.AeroTokens
 import com.metrolist.music.ui.theme.AeroBackground
-import com.metrolist.music.ui.theme.XboxBackdrop
 import com.metrolist.music.ui.theme.extractThemeColor
 import com.metrolist.music.ui.utils.appBarScrollBehavior
 import com.metrolist.music.ui.utils.resetHeightOffset
@@ -728,7 +727,7 @@ class MainActivity : FragmentActivity() {
                         .then(
                             when {
                                 pureBlack -> Modifier.background(Color.Black)
-                                aeroSkin -> Modifier.background(Color(0xFF030A04))
+                                aeroSkin -> Modifier.background(Color(0xFFDFF4FC))
                                 else -> Modifier.background(MaterialTheme.colorScheme.surface)
                             },
                         ),
@@ -756,14 +755,7 @@ class MainActivity : FragmentActivity() {
                 val (previousTab, setPreviousTab) = rememberSaveable { mutableStateOf("home") }
 
                 val (listenTogetherInTopBar) = rememberPreference(ListenTogetherInTopBarKey, defaultValue = true)
-                val navigationItems =
-                    remember(listenTogetherInTopBar) {
-                        if (listenTogetherInTopBar) {
-                            Screens.MainScreens.filter { it != Screens.ListenTogether }
-                        } else {
-                            Screens.MainScreens
-                        }
-                    }
+                val navigationItems = Screens.MainScreens
                 val routeIndexMap = remember(navigationItems) {
                     navigationItems.mapIndexed { i, s -> s.route to i }.toMap()
                 }
@@ -993,7 +985,7 @@ class MainActivity : FragmentActivity() {
                         currentRoute == Screens.ListenTogether.route ||
                             currentRoute == "listen_together_from_topbar"
                     shouldShowTopBar = currentRoute in topLevelScreens &&
-                        currentRoute != "settings" &&
+                        currentRoute !in setOf("settings", Screens.Home.route, Screens.Search.route, Screens.Library.route, Screens.ListenTogether.route) &&
                         !(isListenTogetherScreen && listenTogetherInTopBar)
                 }
 
@@ -1066,7 +1058,7 @@ class MainActivity : FragmentActivity() {
                     LocalChangelogState provides showChangelog,
                     LocalArtistNameAliases provides artistNameAliases,
                 ) {
-                    if (aeroSkin) XboxBackdrop(Modifier.fillMaxSize())
+                    if (aeroSkin) AeroBackground(dark = false, modifier = Modifier.fillMaxSize())
                     if (showChangelog.value) {
                         ChangelogScreen(onDismiss = { showChangelog.value = false })
                     }

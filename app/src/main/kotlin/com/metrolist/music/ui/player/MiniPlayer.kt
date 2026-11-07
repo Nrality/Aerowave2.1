@@ -379,9 +379,9 @@ private fun NewMiniPlayer(
                     .then(if (isTabletLandscape) Modifier.width(500.dp).align(Alignment.Center) else Modifier.fillMaxWidth())
                     .height(64.dp)
                     .offset { IntOffset(offsetXAnimatable.value.roundToInt(), 0) }
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(Color(0xFF081408))
-                    .border(1.dp, Color(0xFF63A830), RoundedCornerShape(4.dp))
+                    .clip(RoundedCornerShape(32.dp))
+                    .background(Color(0xDFFFFFFF))
+                    .border(1.dp, Color.White.copy(alpha = 0.9f), RoundedCornerShape(32.dp))
                     .clickable(
                         interactionSource = interactionSource,
                         indication = LocalIndication.current,

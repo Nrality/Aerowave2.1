@@ -74,7 +74,7 @@ fun NavGraphBuilder.navigationBuilder(
     snackbarHostState: SnackbarHostState,
 ) {
     composable(Screens.Home.route) {
-        HomeScreen(snackbarHostState = snackbarHostState)
+        AerowaveBlueprintHome()
     }
 
     composable(Screens.Search.route) { backStackEntry ->
@@ -89,18 +89,15 @@ fun NavGraphBuilder.navigationBuilder(
             remember(pureBlackEnabled, useDarkTheme) {
                 pureBlackEnabled && useDarkTheme
             }
-        SearchScreen(
-            pureBlack = pureBlack,
-            savedStateHandle = backStackEntry.savedStateHandle
-        )
+        AerowaveBlueprintSearch()
     }
 
     composable(Screens.Library.route) {
-        LibraryScreen()
+        AerowaveBlueprintLibrary()
     }
 
     composable(Screens.ListenTogether.route) {
-        ListenTogetherScreen(navController, showTopBar = false)
+        AerowaveBlueprintOrbit()
     }
 
     composable(
@@ -345,7 +342,7 @@ fun NavGraphBuilder.navigationBuilder(
     }
 
     composable("settings") {
-        SettingsScreen(navController, latestVersionName)
+        AerowaveBlueprintSettings()
     }
 
     composable("settings/appearance") {

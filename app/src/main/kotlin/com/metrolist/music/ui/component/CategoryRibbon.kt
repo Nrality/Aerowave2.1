@@ -31,7 +31,7 @@ import androidx.compose.ui.res.stringResource
 
 enum class NavStyle { TopRibbon, BottomBar }
 
-val ActiveNavStyle = NavStyle.TopRibbon
+val ActiveNavStyle = NavStyle.BottomBar
 
 private data class Destination(val route: String, val title: Int)
 

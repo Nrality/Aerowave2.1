@@ -21,7 +21,7 @@ import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.rememberDynamicColorScheme
 import com.materialkolor.score.Score
 
-val DefaultThemeColor = Color(0xFF7BFF18)
+val DefaultThemeColor = Color(0xFF54B8E8)
 
 @Composable
 fun MetrolistTheme(
@@ -41,6 +41,14 @@ fun MetrolistTheme(
     // Apply pureBlack modification if needed, similar to original logic
     val colorScheme = remember(baseColorScheme, pureBlack, darkTheme, aeroEnabled) {
         when {
+            aeroEnabled -> baseColorScheme.copy(
+                primary = Color(0xFF16872D), onPrimary = Color.White, secondary = Color(0xFF367895), tertiary = Color(0xFF6B5CE7),
+                primaryContainer = Color(0xEFFFFFFF), onPrimaryContainer = Color(0xFF123D5D),
+                background = Color(0xFFDDF3FC), surface = Color(0xFFF4FBFE),
+                surfaceContainerLowest = Color.White, surfaceContainerLow = Color(0xFFF1FAFD),
+                surfaceContainer = Color(0xFFE8F6FB), surfaceContainerHigh = Color(0xFFDDF1F8),
+                surfaceContainerHighest = Color(0xFFD2EAF4),
+            )
             darkTheme && pureBlack -> baseColorScheme.pureBlack(true).copy(primary = Color(0xFF9BFF36), secondary = Color(0xFF5AE620))
             darkTheme -> baseColorScheme.copy(
                 primary = Color(0xFF9BFF36), onPrimary = Color(0xFF142400), secondary = Color(0xFF63E62E), tertiary = Color(0xFFB6F66D),

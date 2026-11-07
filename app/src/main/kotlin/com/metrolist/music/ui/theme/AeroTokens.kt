@@ -5,15 +5,15 @@ import androidx.compose.ui.unit.dp
 
 /** Shared colors and layout values for the Aerowave skin. */
 object AeroTokens {
-    val Sky = Color(0xFF3FA9F5)
-    val Aqua = Color(0xFF7FDBFF)
-    val Lagoon = Color(0xFF00A9C7)
-    val Grass = Color(0xFF6BBE45)
-    val XboxAccent = Color(0xFF9BF00B)
-    val LightSky = Color(0xFFB9EAFF)
-    val LightMint = Color(0xFFDDF8ED)
-    val DarkOcean = Color(0xFF082635)
-    val DarkGlass = Color(0xCC12394A)
+    val Sky = Color(0xFF68C8F4)
+    val Aqua = Color(0xFF9BE6FA)
+    val Lagoon = Color(0xFF43B8D8)
+    val Grass = Color(0xFF74D8A7)
+    val XboxAccent = Color(0xFF42B84B)
+    val LightSky = Color(0xFFDDF4FC)
+    val LightMint = Color(0xFFC8F0DF)
+    val DarkOcean = Color(0xFF123D5D)
+    val DarkGlass = Color(0xCCEDF8FC)
     val LightGlass = Color(0xDDF9FEFF)
 
     val RibbonHeight = 48.dp
