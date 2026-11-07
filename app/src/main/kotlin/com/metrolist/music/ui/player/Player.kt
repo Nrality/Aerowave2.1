@@ -2103,20 +2103,18 @@ private fun PlayerPageTabs(pagerState: PagerState) {
                 modifier =
                     Modifier
                         .weight(1f)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(
-                            if (selected) MaterialTheme.colorScheme.secondaryContainer
-                            else MaterialTheme.colorScheme.surfaceContainer,
-                        ).clickable {
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(if (selected) Color(0xFF83E62A) else Color(0xFF0B190A))
+                        .clickable {
                             coroutineScope.launch { pagerState.animateScrollToPage(index) }
                         }.padding(horizontal = 8.dp, vertical = 10.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = context.getString(label),
+                    text = context.getString(label).uppercase(),
                     color =
-                        if (selected) MaterialTheme.colorScheme.onSecondaryContainer
-                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                        if (selected) Color(0xFF071407)
+                        else Color(0xFFB5C5AA),
                     style = MaterialTheme.typography.labelMedium,
                     maxLines = 1,
                 )

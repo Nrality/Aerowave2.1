@@ -55,13 +55,9 @@ fun NavigationTitle(
         modifier = modifier
             .fillMaxWidth()
             .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
-            .clip(RoundedCornerShape(22.dp))
-            .background(
-                Brush.verticalGradient(
-                    listOf(Color.White.copy(alpha = 0.72f), MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.64f)),
-                ),
-            )
-            .border(1.dp, Color.White.copy(alpha = 0.86f), RoundedCornerShape(22.dp))
+            .clip(RoundedCornerShape(4.dp))
+            .background(Color(0xFF10210E))
+            .border(1.dp, Color(0xFF467B24), RoundedCornerShape(4.dp))
             .clickable(enabled = onClick != null) {
                 onClick?.invoke()
             }
@@ -85,7 +81,7 @@ fun NavigationTitle(
                 text = title,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
+                color = Color(0xFF9BFF36),
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
             )

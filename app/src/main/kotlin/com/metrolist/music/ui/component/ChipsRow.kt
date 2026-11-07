@@ -18,6 +18,10 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -47,6 +51,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
@@ -73,16 +79,17 @@ fun <E> ChipsRow(
         Spacer(Modifier.width(12.dp))
 
         chips.forEach { (value, label) ->
-            FilterChip(
-                label = { Text(label) },
-                selected = currentValue == value,
-                colors = FilterChipDefaults.filterChipColors(
-                    containerColor = containerColor,
-                ),
-                onClick = { onValueUpdate(value) },
-                shape = RoundedCornerShape(16.dp),
-                border = null
-            )
+            val selected = currentValue == value
+            Box(
+                modifier = Modifier.clip(RoundedCornerShape(4.dp))
+                    .background(if (selected) Color(0xFF83E62A) else Color(0xFF0B190A))
+                    .border(1.dp, if (selected) Color(0xFFB8FF55) else Color(0xFF38552F), RoundedCornerShape(4.dp))
+                    .clickable { onValueUpdate(value) }
+                    .padding(horizontal = 14.dp, vertical = 9.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(label.uppercase(), color = if (selected) Color(0xFF081307) else Color(0xFFB5C5AA), style = MaterialTheme.typography.labelMedium)
+            }
 
             Spacer(Modifier.width(8.dp))
         }

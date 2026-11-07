@@ -267,33 +267,23 @@ inline fun ListItem(
             modifier // playing highlight
                 .height(ListItemHeight)
                 .padding(horizontal = 8.dp, vertical = 3.dp)
-                .clip(RoundedCornerShape(18.dp))
-                .background(
-                    color = // selected active
-                        if (isSelected == true) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
-                        else MaterialTheme.colorScheme.secondaryContainer
-                )
+                .clip(RoundedCornerShape(4.dp))
+                .background(Color(0xFF335F18))
+                .border(1.dp, Color(0xFF9BFF36), RoundedCornerShape(4.dp))
         } else if (isSelected == true) {
             modifier // inactive selected
                 .height(ListItemHeight)
                 .padding(horizontal = 8.dp, vertical = 3.dp)
-                .clip(RoundedCornerShape(18.dp))
-                .background(color = MaterialTheme.colorScheme.inversePrimary.copy(alpha = 0.4f))
-                .border(1.dp, Color.White.copy(alpha = 0.55f), RoundedCornerShape(18.dp))
+                .clip(RoundedCornerShape(4.dp))
+                .background(Color(0xFF8BEA29).copy(alpha = 0.25f))
+                .border(1.dp, Color(0xFF9BFF36), RoundedCornerShape(4.dp))
         } else {
             modifier // default
                 .height(ListItemHeight)
                 .padding(horizontal = 8.dp, vertical = 3.dp)
-                .clip(RoundedCornerShape(18.dp))
-                .background(
-                    Brush.verticalGradient(
-                        listOf(
-                            MaterialTheme.colorScheme.surface.copy(alpha = 0.90f),
-                            MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.72f),
-                        ),
-                    ),
-                )
-                .border(1.dp, Color.White.copy(alpha = 0.68f), RoundedCornerShape(18.dp))
+                .clip(RoundedCornerShape(4.dp))
+                .background(Color(0xA6102410))
+                .border(1.dp, Color(0x5538A823), RoundedCornerShape(4.dp))
         }
     ) {
         Box(
