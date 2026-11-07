@@ -727,14 +727,7 @@ class MainActivity : FragmentActivity() {
                         .then(
                             when {
                                 pureBlack -> Modifier.background(Color.Black)
-                                aeroSkin -> Modifier.background(
-                                    androidx.compose.ui.graphics.Brush.verticalGradient(
-                                    listOf(
-                                        if (useDarkTheme) AeroTokens.DarkOcean else AeroTokens.LightSky,
-                                        if (useDarkTheme) Color(0xFF0B4554) else AeroTokens.LightMint,
-                                    ),
-                                    ),
-                                )
+                                aeroSkin -> Modifier.background(Color(0xFF030A04))
                                 else -> Modifier.background(MaterialTheme.colorScheme.surface)
                             },
                         ),
@@ -1072,9 +1065,6 @@ class MainActivity : FragmentActivity() {
                     LocalChangelogState provides showChangelog,
                     LocalArtistNameAliases provides artistNameAliases,
                 ) {
-                    if (aeroSkin && !pureBlack) {
-                        AeroBackground(dark = useDarkTheme, modifier = Modifier.fillMaxSize())
-                    }
                     if (showChangelog.value) {
                         ChangelogScreen(onDismiss = { showChangelog.value = false })
                     }
@@ -1097,21 +1087,11 @@ class MainActivity : FragmentActivity() {
                                                         modifier = Modifier
                                                             .size(30.dp)
                                                             .clip(CircleShape)
-                                                            .background(
-                                                                androidx.compose.ui.graphics.Brush.verticalGradient(
-                                                                    listOf(Color(0xFFB9FFD4), Color(0xFF22B8D0)),
-                                                                ),
-                                                            )
-                                                            .border(1.dp, Color.White.copy(alpha = 0.85f), CircleShape),
-                                                        contentAlignment = Alignment.TopStart,
+                                                        .background(Color(0xFF17340C))
+                                                        .border(1.dp, Color(0xFF9BFF36), CircleShape),
+                                                    contentAlignment = Alignment.Center,
                                                     ) {
-                                                        Box(
-                                                            Modifier
-                                                                .padding(start = 6.dp, top = 5.dp)
-                                                                .size(8.dp)
-                                                                .clip(CircleShape)
-                                                                .background(Color.White.copy(alpha = 0.9f)),
-                                                        )
+                                                    Text("X", color = Color(0xFF9BFF36), fontWeight = androidx.compose.ui.text.font.FontWeight.Black)
                                                     }
                                                     Text(
                                                         text = stringResource(R.string.app_name).uppercase(),

@@ -21,7 +21,7 @@ import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.rememberDynamicColorScheme
 import com.materialkolor.score.Score
 
-val DefaultThemeColor = Color(0xFF00A9C7)
+val DefaultThemeColor = Color(0xFF7BFF18)
 
 @Composable
 fun MetrolistTheme(
@@ -32,7 +32,7 @@ fun MetrolistTheme(
     content: @Composable () -> Unit,
 ) {
     val baseColorScheme = rememberDynamicColorScheme(
-        seedColor = themeColor,
+        seedColor = Color(0xFF72F319),
         isDark = darkTheme,
         specVersion = ColorSpec.SpecVersion.SPEC_2025,
         style = PaletteStyle.Vibrant,
@@ -41,55 +41,20 @@ fun MetrolistTheme(
     // Apply pureBlack modification if needed, similar to original logic
     val colorScheme = remember(baseColorScheme, pureBlack, darkTheme, aeroEnabled) {
         when {
-            aeroEnabled && darkTheme && pureBlack -> baseColorScheme.pureBlack(true).copy(
-                primary = AeroTokens.Aqua,
-                secondary = AeroTokens.Grass,
-                tertiary = AeroTokens.Sky,
-            )
-            aeroEnabled && darkTheme -> baseColorScheme.copy(
-                primary = AeroTokens.Aqua,
-                onPrimary = AeroTokens.DarkOcean,
-                secondary = AeroTokens.Grass,
-                tertiary = AeroTokens.Sky,
-                background = AeroTokens.DarkOcean,
-                surface = AeroTokens.DarkGlass,
-                surfaceContainerLowest = Color(0xCC0B2F40),
-                surfaceContainerLow = Color(0xD9103545),
-                surfaceContainer = AeroTokens.DarkGlass,
-                surfaceContainerHigh = Color(0xE31A4658),
-                surfaceContainerHighest = Color(0xEE205366),
-            )
-            aeroEnabled -> baseColorScheme.copy(
-                primary = Color(0xFF087F9C),
-                onPrimary = Color.White,
-                secondary = Color(0xFF388B51),
-                tertiary = Color(0xFF168FB1),
-                background = AeroTokens.LightSky,
-                surface = AeroTokens.LightGlass,
-                surfaceContainerLowest = Color(0xEFFFFFFF),
-                surfaceContainerLow = Color(0xEAF7FDFF),
-                surfaceContainer = AeroTokens.LightGlass,
-                surfaceContainerHigh = Color(0xEAF0FBFF),
-                surfaceContainerHighest = Color(0xE5E4F7FC),
-            )
-            darkTheme && pureBlack -> baseColorScheme.pureBlack(true)
+            darkTheme && pureBlack -> baseColorScheme.pureBlack(true).copy(primary = Color(0xFF9BFF36), secondary = Color(0xFF5AE620))
             darkTheme -> baseColorScheme.copy(
-                background = Color(0xFF071D2A),
-                surface = Color(0xFF0B2938),
-                surfaceContainerLowest = Color(0xFF061722),
-                surfaceContainerLow = Color(0xFF0C2A39),
-                surfaceContainer = Color(0xFF103447),
-                surfaceContainerHigh = Color(0xFF164156),
-                surfaceContainerHighest = Color(0xFF1D4D62),
+                primary = Color(0xFF9BFF36), onPrimary = Color(0xFF142400), secondary = Color(0xFF63E62E), tertiary = Color(0xFFB6F66D),
+                background = Color(0xFF030A04), surface = Color(0xFF071208),
+                surfaceContainerLowest = Color(0xFF030A04), surfaceContainerLow = Color(0xFF09170A),
+                surfaceContainer = Color(0xFF0D1E0D), surfaceContainerHigh = Color(0xFF152914),
+                surfaceContainerHighest = Color(0xFF20391B),
             )
             else -> baseColorScheme.copy(
-                background = Color(0xFFE7F7FB),
-                surface = Color(0xFFF5FCFF),
-                surfaceContainerLowest = Color.White,
-                surfaceContainerLow = Color(0xFFF1FBFE),
-                surfaceContainer = Color(0xFFDDF3F8),
-                surfaceContainerHigh = Color(0xFFCAEAF2),
-                surfaceContainerHighest = Color(0xFFB5DFEA),
+                primary = Color(0xFF397E12), secondary = Color(0xFF3F7F22),
+                background = Color(0xFFE7F0DF), surface = Color(0xFFF2F7EC),
+                surfaceContainerLowest = Color.White, surfaceContainerLow = Color(0xFFEEF5E8),
+                surfaceContainer = Color(0xFFE4EEDB), surfaceContainerHigh = Color(0xFFD8E6CC),
+                surfaceContainerHighest = Color(0xFFCCDDBE),
             )
         }
     }

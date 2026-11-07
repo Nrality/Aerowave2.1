@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="explore">Explore</string>
-    <string name="aero_skin">Frutiger Aero skin</string>
-    <string name="aero_skin_desc">Glossy sky and ocean colors with translucent panels</string>
+    <string name="aero_skin">Original Xbox theme</string>
+    <string name="aero_skin_desc">Dark green surfaces with neon green highlights</string>
     <string name="local_history">Local</string>
     <string name="remote_history">Remote</string>
 

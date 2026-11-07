@@ -1,6 +1,10 @@
 package com.metrolist.music.ui.component
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -68,6 +72,9 @@ fun CategoryRibbon(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(40.dp)
+                    .clip(RoundedCornerShape(5.dp))
+                    .background(if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.19f) else MaterialTheme.colorScheme.surfaceContainerLow)
+                    .border(1.dp, if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(5.dp))
                     .clickable {
                         if (page == pagerState.currentPage) {
                             onSelect(destination.route)
@@ -81,7 +88,7 @@ fun CategoryRibbon(
                     text = stringResource(destination.titleRes),
                     modifier = Modifier.padding(horizontal = 8.dp),
                     color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.titleSmall,
+                    style = MaterialTheme.typography.labelLarge,
                 )
             }
         }
