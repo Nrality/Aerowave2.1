@@ -1,41 +1,44 @@
 package com.metrolist.music.ui.component
 
-import androidx.compose.foundation.clickable
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.draw.clip
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PageSize
-import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.metrolist.music.R
-import kotlinx.coroutines.launch
+import androidx.compose.ui.res.stringResource
 
 enum class NavStyle { TopRibbon, BottomBar }
 
-// A single switch restores the current bottom navigation and adaptive rail.
 val ActiveNavStyle = NavStyle.TopRibbon
 
-private data class RibbonDestination(val route: String, val titleRes: Int)
+private data class Destination(val route: String, val title: Int)
 
 private val destinations = listOf(
-    RibbonDestination("home", R.string.home),
-    RibbonDestination("new_release", R.string.explore),
-    RibbonDestination("library", R.string.filter_library),
+    Destination("home", R.string.home),
+    Destination("new_release", R.string.explore),
+    Destination("library", R.string.filter_library),
 )
 
 @Composable
@@ -44,52 +47,46 @@ fun CategoryRibbon(
     onSelect: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val selectedPage = destinations.indexOfFirst { it.route == selectedRoute }.coerceAtLeast(0)
-    val pagerState = rememberPagerState(initialPage = selectedPage) { destinations.size }
-    val scope = rememberCoroutineScope()
-
-    LaunchedEffect(selectedPage) {
-        if (pagerState.currentPage != selectedPage) pagerState.animateScrollToPage(selectedPage)
-    }
-    LaunchedEffect(pagerState.currentPage) {
-        val destination = destinations[pagerState.currentPage]
-        if (destination.route != selectedRoute) onSelect(destination.route)
-    }
-
-    BoxWithConstraints(modifier.fillMaxWidth().height(48.dp), contentAlignment = Alignment.Center) {
-        val pageWidth = ((maxWidth - 40.dp) / destinations.size).coerceAtLeast(76.dp)
-        val outerPadding = ((maxWidth - (pageWidth * destinations.size) - 8.dp) / 2).coerceAtLeast(8.dp)
-        HorizontalPager(
-            state = pagerState,
-            pageSize = PageSize.Fixed(pageWidth),
-            contentPadding = PaddingValues(horizontal = outerPadding),
-            pageSpacing = 4.dp,
-            modifier = Modifier.fillMaxWidth(),
-        ) { page ->
-            val destination = destinations[page]
-            val selected = page == pagerState.currentPage
-            androidx.compose.foundation.layout.Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(40.dp)
-                    .clip(RoundedCornerShape(5.dp))
-                    .background(if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.19f) else MaterialTheme.colorScheme.surfaceContainerLow)
-                    .border(1.dp, if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(5.dp))
-                    .clickable {
-                        if (page == pagerState.currentPage) {
-                            onSelect(destination.route)
-                        } else {
-                            scope.launch { pagerState.animateScrollToPage(page) }
-                        }
-                    },
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = stringResource(destination.titleRes),
-                    modifier = Modifier.padding(horizontal = 8.dp),
-                    color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.labelLarge,
+    Row(
+        modifier = modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(18.dp),
+    ) {
+        Box(
+            modifier = Modifier.size(82.dp).clip(CircleShape)
+                .background(Brush.radialGradient(listOf(Color(0xFFB5FF49), Color(0xFF31880E), Color(0xFF0A2108))))
+                .border(2.dp, Color(0xFF9BFF36).copy(alpha = 0.86f), CircleShape),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text("X", color = Color(0xFFE1FFB0), fontSize = 42.sp, fontWeight = FontWeight.Black)
+        }
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(5.dp),
+        ) {
+            destinations.forEach { destination ->
+                val selected = destination.route == selectedRoute
+                val glow by animateColorAsState(
+                    if (selected) Color(0xFF9BFF36) else Color(0xFF31552A),
+                    label = "dashboard selection",
                 )
+                Box(
+                    modifier = Modifier.fillMaxWidth().height(34.dp)
+                        .clip(RoundedCornerShape(5.dp))
+                        .background(if (selected) Brush.horizontalGradient(listOf(Color(0xFF8AF02B), Color(0xFF315F13))) else Brush.horizontalGradient(listOf(Color(0x66203A19), Color(0x33203A19))))
+                        .border(1.dp, glow.copy(alpha = if (selected) 0.95f else 0.45f), RoundedCornerShape(5.dp))
+                        .clickable { onSelect(destination.route) }
+                        .padding(horizontal = 12.dp),
+                    contentAlignment = Alignment.CenterStart,
+                ) {
+                    Text(
+                        stringResource(destination.title).uppercase(),
+                        color = if (selected) Color(0xFF071407) else MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 12.sp,
+                        letterSpacing = 1.4.sp,
+                        fontWeight = if (selected) FontWeight.Black else FontWeight.Medium,
+                    )
+                }
             }
         }
     }
