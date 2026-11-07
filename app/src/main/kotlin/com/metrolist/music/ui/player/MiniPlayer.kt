@@ -425,6 +425,15 @@ private fun NewMiniPlayer(
                 }
                 else -> {}
             }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(Color.White.copy(alpha = 0.32f), Color.White.copy(alpha = 0.06f), Color.Transparent),
+                        ),
+                    ),
+            )
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp, vertical = 8.dp),

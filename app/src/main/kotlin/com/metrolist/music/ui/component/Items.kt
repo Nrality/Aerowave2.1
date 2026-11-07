@@ -16,6 +16,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
@@ -59,6 +60,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -264,8 +266,8 @@ inline fun ListItem(
         modifier = if (isActive) {
             modifier // playing highlight
                 .height(ListItemHeight)
-                .padding(horizontal = 8.dp)
-                .clip(RoundedCornerShape(8.dp))
+                .padding(horizontal = 8.dp, vertical = 3.dp)
+                .clip(RoundedCornerShape(18.dp))
                 .background(
                     color = // selected active
                         if (isSelected == true) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
@@ -274,13 +276,24 @@ inline fun ListItem(
         } else if (isSelected == true) {
             modifier // inactive selected
                 .height(ListItemHeight)
-                .padding(horizontal = 8.dp)
-                .clip(RoundedCornerShape(8.dp))
+                .padding(horizontal = 8.dp, vertical = 3.dp)
+                .clip(RoundedCornerShape(18.dp))
                 .background(color = MaterialTheme.colorScheme.inversePrimary.copy(alpha = 0.4f))
+                .border(1.dp, Color.White.copy(alpha = 0.55f), RoundedCornerShape(18.dp))
         } else {
             modifier // default
                 .height(ListItemHeight)
-                .padding(horizontal = 8.dp)
+                .padding(horizontal = 8.dp, vertical = 3.dp)
+                .clip(RoundedCornerShape(18.dp))
+                .background(
+                    Brush.verticalGradient(
+                        listOf(
+                            MaterialTheme.colorScheme.surface.copy(alpha = 0.90f),
+                            MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.72f),
+                        ),
+                    ),
+                )
+                .border(1.dp, Color.White.copy(alpha = 0.68f), RoundedCornerShape(18.dp))
         }
     ) {
         Box(

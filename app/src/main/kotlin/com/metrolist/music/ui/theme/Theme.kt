@@ -39,10 +39,26 @@ fun MetrolistTheme(
 
     // Apply pureBlack modification if needed, similar to original logic
     val colorScheme = remember(baseColorScheme, pureBlack, darkTheme) {
-        if (darkTheme && pureBlack) {
-            baseColorScheme.pureBlack(true)
-        } else {
-            baseColorScheme
+        when {
+            darkTheme && pureBlack -> baseColorScheme.pureBlack(true)
+            darkTheme -> baseColorScheme.copy(
+                background = Color(0xFF071D2A),
+                surface = Color(0xFF0B2938),
+                surfaceContainerLowest = Color(0xFF061722),
+                surfaceContainerLow = Color(0xFF0C2A39),
+                surfaceContainer = Color(0xFF103447),
+                surfaceContainerHigh = Color(0xFF164156),
+                surfaceContainerHighest = Color(0xFF1D4D62),
+            )
+            else -> baseColorScheme.copy(
+                background = Color(0xFFE7F7FB),
+                surface = Color(0xFFF5FCFF),
+                surfaceContainerLowest = Color.White,
+                surfaceContainerLow = Color(0xFFF1FBFE),
+                surfaceContainer = Color(0xFFDDF3F8),
+                surfaceContainerHigh = Color(0xFFCAEAF2),
+                surfaceContainerHighest = Color(0xFFB5DFEA),
+            )
         }
     }
 
