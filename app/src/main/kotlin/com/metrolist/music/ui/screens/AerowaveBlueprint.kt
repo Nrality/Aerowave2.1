@@ -32,8 +32,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
-import com.metrolist.innertube.models.SongItem
 import com.metrolist.music.LocalNavController
+import com.metrolist.music.LocalDatabase
 import com.metrolist.music.LocalPlayerConnection
 import com.metrolist.music.R
 import com.metrolist.music.constants.AutoRadioQueueKey
@@ -136,6 +136,7 @@ fun AerowaveBlueprintHome(viewModel: HomeViewModel = hiltViewModel()) {
     val player = LocalPlayerConnection.current ?: return
     val quickPicks by viewModel.quickPicks.collectAsStateWithLifecycle()
     val homeItems by viewModel.allLocalItems.collectAsStateWithLifecycle()
+    val accountPlaylists by viewModel.accountPlaylists.collectAsStateWithLifecycle()
     val songs = (quickPicks.orEmpty() + homeItems.filterIsInstance<Song>()).distinctBy { it.id }.take(12)
     val (autoRadio) = rememberPreference(AutoRadioQueueKey, true)
     LaunchedEffect(Unit) { viewModel.loadHomeData() }
@@ -175,12 +176,17 @@ fun AerowaveBlueprintHome(viewModel: HomeViewModel = hiltViewModel()) {
             }
             item {
                 SectionLabel("Your playlists")
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    listOf("Chill Vibes", "Road Trip", "Focus").forEachIndexed { index, name ->
-                        Column(Modifier.weight(1f).clickable { navController.navigate("library") }) {
-                            Artwork(null, index + 3, Modifier.fillMaxWidth().height(88.dp))
-                            Text(name, color = Ink, fontSize = 13.sp, maxLines = 1, modifier = Modifier.padding(top = 5.dp))
-                            Text("Open library", color = MutedInk, fontSize = 11.sp)
+                val playlists = accountPlaylists.orEmpty().take(3)
+                if (playlists.isEmpty()) {
+                    Text("Your saved playlists will appear here", color = MutedInk, modifier = Modifier.padding(vertical = 8.dp))
+                } else {
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        playlists.forEachIndexed { index, playlist ->
+                            Column(Modifier.weight(1f).clickable { navController.navigate("online_playlist/${playlist.id}") }) {
+                                Artwork(playlist.thumbnail, index + 3, Modifier.fillMaxWidth().height(88.dp))
+                                Text(playlist.title, color = Ink, fontSize = 13.sp, maxLines = 1, modifier = Modifier.padding(top = 5.dp))
+                                Text(playlist.songCountText.orEmpty(), color = MutedInk, fontSize = 11.sp)
+                            }
                         }
                     }
                 }
@@ -240,6 +246,13 @@ fun AerowaveBlueprintSearch() {
 @Composable
 fun AerowaveBlueprintLibrary() {
     val navController = LocalNavController.current
+    val database = LocalDatabase.current
+    val homeViewModel: HomeViewModel = hiltViewModel()
+    val localPlaylists by database.playlistsByCreateDateAsc().collectAsStateWithLifecycle(emptyList())
+    val albums by database.albumsByCreateDateAsc().collectAsStateWithLifecycle(emptyList())
+    val artists by database.artistsByCreateDateAsc().collectAsStateWithLifecycle(emptyList())
+    val accountPlaylists by homeViewModel.accountPlaylists.collectAsStateWithLifecycle()
+    LaunchedEffect(Unit) { homeViewModel.loadHomeData() }
     var tab by remember { mutableStateOf("Playlists") }
     BlueprintPage("Library", onSettings = { navController.navigate("settings") }) {
         LazyColumn(contentPadding = PaddingValues(bottom = 104.dp)) {
@@ -259,41 +272,73 @@ fun AerowaveBlueprintLibrary() {
                 }
             }
             item {
-                val entries = when (tab) {
-                    "Albums" -> listOf("Recently added", "Saved albums")
-                    "Artists" -> listOf("Your artists", "Recently played")
-                    else -> listOf("Liked songs", "Downloads", "Most played", "Recently added")
-                }
-                entries.chunked(2).forEachIndexed { rowIndex, pair ->
-                    Row(Modifier.fillMaxWidth().padding(bottom = 10.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        pair.forEachIndexed { index, name ->
-                            Column(Modifier.weight(1f).height(112.dp).clip(RoundedCornerShape(24.dp)).background(Glass).clickable {
-                                when (name) {
-                                    "Liked songs" -> navController.navigate("auto_playlist/liked")
-                                    "Downloads" -> navController.navigate("auto_playlist/downloaded")
-                    "Most played" -> navController.navigate("top_playlist/50")
-                                    else -> navController.navigate("auto_playlist/recently_added")
+                when (tab) {
+                    "Albums" -> CollectionGrid(albums.take(8), { it.title }, { it.thumbnailUrl }) { navController.navigate("album/${it.id}") }
+                    "Artists" -> CollectionGrid(artists.take(8), { it.title }, { it.thumbnailUrl }) { navController.navigate("artist/${it.id}") }
+                    else -> {
+                        val shortcuts = listOf(
+                            Triple("Liked songs", "Your favorites", "auto_playlist/liked"),
+                            Triple("Downloads", "Offline music", "auto_playlist/downloaded"),
+                            Triple("Most played", "Top 50", "top_playlist/50"),
+                            Triple("Uploaded", "Your uploads", "auto_playlist/uploaded"),
+                        )
+                        shortcuts.chunked(2).forEachIndexed { rowIndex, pair ->
+                            Row(Modifier.fillMaxWidth().padding(bottom = 10.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                pair.forEachIndexed { index, (name, subtitle, route) ->
+                                    Column(Modifier.weight(1f).height(112.dp).clip(RoundedCornerShape(24.dp)).background(Glass).clickable { navController.navigate(route) }.padding(14.dp)) {
+                                        Artwork(null, rowIndex * 2 + index, Modifier.size(42.dp))
+                                        Text(name, color = Ink, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 8.dp))
+                                        Text(subtitle, color = MutedInk, fontSize = 12.sp)
+                                    }
                                 }
-                            }.padding(14.dp)) {
-                                Artwork(null, rowIndex * 2 + index, Modifier.size(42.dp))
-                                Text(name, color = Ink, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 8.dp))
-                                Text(if (name == "Liked songs") "Your favorites" else "Open collection", color = MutedInk, fontSize = 12.sp)
                             }
                         }
-                        if (pair.size == 1) Spacer(Modifier.weight(1f))
                     }
                 }
             }
             item { SectionLabel("Your playlists") }
             item {
-                listOf("Chill Vibes", "Road Trip", "Focus").forEachIndexed { index, name ->
-                    Row(Modifier.fillMaxWidth().padding(bottom = 8.dp).clip(RoundedCornerShape(22.dp)).background(Glass).clickable { navController.navigate("auto_playlist/liked") }.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Artwork(null, index + 2, Modifier.size(48.dp))
-                        Column(Modifier.padding(start = 12.dp)) { Text(name, color = Ink, fontWeight = FontWeight.SemiBold); Text("Open playlist", color = MutedInk, fontSize = 12.sp) }
+                val local = localPlaylists.take(4)
+                val online = accountPlaylists.orEmpty().take((4 - local.size).coerceAtLeast(0))
+                if (local.isEmpty() && online.isEmpty()) {
+                    Text("Playlists you save will show up here", color = MutedInk, modifier = Modifier.padding(vertical = 8.dp))
+                }
+                local.forEachIndexed { index, playlist ->
+                    CollectionRow(playlist.title, playlist.playlist.thumbnailUrl, index) {
+                        navController.navigate(if (playlist.playlist.isLocal) "local_playlist/${playlist.id}" else "online_playlist/${playlist.playlist.browseId ?: playlist.id}")
+                    }
+                }
+                online.forEachIndexed { index, playlist ->
+                    CollectionRow(playlist.title, playlist.thumbnail, index + local.size) {
+                        navController.navigate("online_playlist/${playlist.id}")
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun <T> CollectionGrid(items: List<T>, title: (T) -> String, image: (T) -> String?, onClick: (T) -> Unit) {
+    items.chunked(2).forEachIndexed { rowIndex, pair ->
+        Row(Modifier.fillMaxWidth().padding(bottom = 10.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            pair.forEachIndexed { index, item ->
+                Column(Modifier.weight(1f).height(118.dp).clip(RoundedCornerShape(24.dp)).background(Glass).clickable { onClick(item) }.padding(12.dp)) {
+                    Artwork(image(item), rowIndex * 2 + index, Modifier.size(44.dp))
+                    Text(title(item), color = Ink, fontWeight = FontWeight.SemiBold, maxLines = 1, modifier = Modifier.padding(top = 8.dp))
+                    Text("Open collection", color = MutedInk, fontSize = 12.sp)
+                }
+            }
+            if (pair.size == 1) Spacer(Modifier.weight(1f))
+        }
+    }
+}
+
+@Composable
+private fun CollectionRow(name: String, image: String?, index: Int, onClick: () -> Unit) {
+    Row(Modifier.fillMaxWidth().padding(bottom = 8.dp).clip(RoundedCornerShape(22.dp)).background(Glass).clickable(onClick = onClick).padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+        Artwork(image, index + 2, Modifier.size(48.dp))
+        Column(Modifier.padding(start = 12.dp)) { Text(name, color = Ink, fontWeight = FontWeight.SemiBold); Text("Open playlist", color = MutedInk, fontSize = 12.sp) }
     }
 }
 
