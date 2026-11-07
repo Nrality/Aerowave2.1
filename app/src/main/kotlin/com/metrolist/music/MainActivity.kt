@@ -206,6 +206,7 @@ import com.metrolist.music.ui.theme.DefaultThemeColor
 import com.metrolist.music.ui.theme.MetrolistTheme
 import com.metrolist.music.ui.theme.AeroTokens
 import com.metrolist.music.ui.theme.AeroBackground
+import com.metrolist.music.ui.theme.XboxBackdrop
 import com.metrolist.music.ui.theme.extractThemeColor
 import com.metrolist.music.ui.utils.appBarScrollBehavior
 import com.metrolist.music.ui.utils.resetHeightOffset
@@ -1065,6 +1066,7 @@ class MainActivity : FragmentActivity() {
                     LocalChangelogState provides showChangelog,
                     LocalArtistNameAliases provides artistNameAliases,
                 ) {
+                    if (aeroSkin) XboxBackdrop(Modifier.fillMaxSize())
                     if (showChangelog.value) {
                         ChangelogScreen(onDismiss = { showChangelog.value = false })
                     }
